@@ -1,0 +1,12 @@
+[
+  {
+    "id": "1",
+    "name": "Sample Product",
+    "description": "This is a sample product.",
+    "price": 10000,
+    "category": "Panel",
+    "image": "/placeholder.svg",
+    "benefits": "Benefit 1, Benefit 2",
+    "redirectUrl": ""
+  }
+]

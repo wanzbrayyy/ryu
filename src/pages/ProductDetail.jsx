@@ -17,13 +17,19 @@ const ProductDetail = () => {
   const [liked, setLiked] = useState(false);
 
   useEffect(() => {
-    const products = JSON.parse(localStorage.getItem('ryuStoreProducts') || '[]');
-    const foundProduct = products.find(p => p.id === id);
-    
-    if (foundProduct) {
-      setProduct(foundProduct);
-    }
-    setLoading(false);
+    fetch('/products.json')
+      .then(response => response.json())
+      .then(data => {
+        const foundProduct = data.find(p => p.id === id);
+        if (foundProduct) {
+          setProduct(foundProduct);
+        }
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching product:', error);
+        setLoading(false);
+      });
   }, [id]);
 
   const handleBuyNow = () => {
