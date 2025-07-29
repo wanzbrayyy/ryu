@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
@@ -33,15 +33,9 @@ const HomePage = () => {
     });
   }, []);
 
-  const [products, setProducts] = useState([]);
-  const testimonials = JSON.parse(localStorage.getItem('ryuStoreTestimonials') || '[]').slice(0, 3);
+  const products = JSON.parse(localStorage.getItem('ryuStoreProducts') || '[]');
 
-  useEffect(() => {
-    fetch('/products.json')
-      .then(response => response.json())
-      .then(data => setProducts(data))
-      .catch(error => console.error('Error fetching products:', error));
-  }, []);
+  const testimonials = JSON.parse(localStorage.getItem('ryuStoreTestimonials') || '[]').slice(0, 3);
 
   return (
     <>

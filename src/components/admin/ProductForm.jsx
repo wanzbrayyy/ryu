@@ -20,11 +20,12 @@ const ProductForm = ({ editingProduct, onFormSubmit, onCancelEdit }) => {
   });
   const [filePreview, setFilePreview] = useState('');
   const fileInputRef = useRef(null);
+  const [userHash, setUserHash] = useState('d7eed82ae3aece8a4b6f473dd');
 
   useEffect(() => {
     if (editingProduct) {
       setProductForm(editingProduct);
-      setFilePreview(editingProduct.file); // Assuming 'file' contains the data URL
+      setFilePreview(editingProduct.image);
     } else {
       setProductForm({
         name: '',
@@ -44,14 +45,15 @@ const ProductForm = ({ editingProduct, onFormSubmit, onCancelEdit }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setProductForm({
+        ...productForm,
+        file: file,
+        fileName: file.name,
+        fileType: file.type
+      });
+
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProductForm({ 
-          ...productForm, 
-          file: reader.result,
-          fileName: file.name,
-          fileType: file.type
-        });
         if (file.type.startsWith('image/')) {
           setFilePreview(reader.result);
         } else {
@@ -62,11 +64,39 @@ const ProductForm = ({ editingProduct, onFormSubmit, onCancelEdit }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you'd upload the file and save the URL.
-    // Here, we'll save the base64 string directly for simplicity.
-    const dataToSubmit = { ...productForm, image: productForm.file };
+
+    let imageUrl = productForm.image;
+
+    if (productForm.file) {
+      const formData = new FormData();
+      formData.append('reqtype', 'fileupload');
+      formData.append('userhash', userHash);
+      formData.append('fileToUpload', productForm.file);
+
+      try {
+        const response = await fetch('https://catbox.moe/user/api.php', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Catbox API error:", errorText);
+            alert(`Error uploading file: ${errorText}`);
+            return;
+        }
+
+        imageUrl = await response.text();
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        alert('An error occurred while uploading the file. Please try again.');
+        return;
+      }
+    }
+
+    const dataToSubmit = { ...productForm, image: imageUrl };
     onFormSubmit(dataToSubmit);
     setFilePreview('');
     if (fileInputRef.current) {
